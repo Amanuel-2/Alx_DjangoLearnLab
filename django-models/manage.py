@@ -1,8 +1,3 @@
-# Check current models.py content
-cat relationship_app/models.py
-
-# It should have the models. If not, update it:
-cat > relationship_app/models.py << 'EOF'
 from django.db import models
 
 class Author(models.Model):
@@ -31,4 +26,3 @@ class Librarian(models.Model):
     
     def __str__(self):
         return self.name
-EOF
