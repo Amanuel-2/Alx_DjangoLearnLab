@@ -4,6 +4,16 @@ from .models import Book
 from .forms import BookForm
 
 
+# Security notes:
+# - All user input is handled via Django forms (`BookForm`) which validate and
+#   clean data. This prevents SQL injection as the ORM is used for queries and
+#   no raw SQL or string interpolation is performed.
+# - Templates use Django auto-escaping for output. Ensure any rich HTML input
+#   is sanitized before rendering.
+# - CSRF protection is enforced by including `{% csrf_token %}` in form templates
+#   and by `CsrfViewMiddleware` enabled in `settings.py`.
+
+
 @login_required
 @permission_required('bookshelf.can_view', raise_exception=True)
 def book_list(request):

@@ -10,6 +10,7 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/6.0/ref/settings/
 """
 
+import os
 from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -23,9 +24,11 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-pq1t_2bh@$x=%@mk@zf4c0e%04!f_o_1a#f(5fm)*$bor@i3v='
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+# Default to False for safer defaults. Override in development with
+# `export DJANGO_DEBUG=True` when needed.
+DEBUG = os.getenv('DJANGO_DEBUG', 'False').lower() in ('1', 'true', 'yes')
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = os.getenv('DJANGO_ALLOWED_HOSTS', 'localhost,127.0.0.1').split(',')
 
 
 # Application definition
@@ -44,6 +47,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'LibraryProject.middleware.ContentSecurityPolicyMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -123,3 +127,24 @@ LOGOUT_REDIRECT_URL = '/login/'
 AUTH_USER_MODEL = 'bookshelf.CustomUser'
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
+
+# -- Security-related settings (recommended for production) --
+# Browser XSS filter
+SECURE_BROWSER_XSS_FILTER = True
+# Prevent the site from being framed to protect against clickjacking
+X_FRAME_OPTIONS = 'DENY'
+# Prevent content type sniffing
+SECURE_CONTENT_TYPE_NOSNIFF = True
+# Ensure cookies are sent only over HTTPS
+CSRF_COOKIE_SECURE = True
+SESSION_COOKIE_SECURE = True
+
+# HTTP Strict Transport Security - only enable with HTTPS in production
+SECURE_HSTS_SECONDS = 3600
+SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+SECURE_HSTS_PRELOAD = False
+
+# Content Security Policy - middleware will use this setting if present.
+# Example: allow only same-origin resources; adjust for external CDNs.
+CSP_POLICY = "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:;"
+
