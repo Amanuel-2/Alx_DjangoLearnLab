@@ -10,7 +10,6 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/6.0/ref/settings/
 """
 
-import os
 from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -24,11 +23,9 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-pq1t_2bh@$x=%@mk@zf4c0e%04!f_o_1a#f(5fm)*$bor@i3v='
 
 # SECURITY WARNING: don't run with debug turned on in production!
-# Default to False for safer defaults. Override in development with
-# `export DJANGO_DEBUG=True` when needed.
-DEBUG = os.getenv('DJANGO_DEBUG', 'False').lower() in ('1', 'true', 'yes')
+DEBUG = False
 
-ALLOWED_HOSTS = os.getenv('DJANGO_ALLOWED_HOSTS', 'localhost,127.0.0.1').split(',')
+ALLOWED_HOSTS = []
 
 
 # Application definition
@@ -43,17 +40,18 @@ INSTALLED_APPS = [
     'bookshelf',
     'relationship_app',
     'django_extensions',
+    'csp',
 ]
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
-    'LibraryProject.middleware.ContentSecurityPolicyMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'csp.middleware.CSPMiddleware',
 ]
 
 ROOT_URLCONF = 'LibraryProject.urls'
@@ -127,24 +125,46 @@ LOGOUT_REDIRECT_URL = '/login/'
 AUTH_USER_MODEL = 'bookshelf.CustomUser'
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
+# Security settings to prevent XSS, clickjacking, and MIME sniffing
 
-# -- Security-related settings (recommended for production) --
-# Browser XSS filter
 SECURE_BROWSER_XSS_FILTER = True
-# Prevent the site from being framed to protect against clickjacking
-X_FRAME_OPTIONS = 'DENY'
-# Prevent content type sniffing
 SECURE_CONTENT_TYPE_NOSNIFF = True
-# Ensure cookies are sent only over HTTPS
-CSRF_COOKIE_SECURE = True
+X_FRAME_OPTIONS = "DENY"
+
 SESSION_COOKIE_SECURE = True
+CSRF_COOKIE_SECURE = True
 
-# HTTP Strict Transport Security - only enable with HTTPS in production
-SECURE_HSTS_SECONDS = 3600
+
+# ==============================
+# HTTPS & SECURITY CONFIGURATION
+# ==============================
+
+# Redirect all HTTP requests to HTTPS
+SECURE_SSL_REDIRECT = True
+
+# HTTP Strict Transport Security (HSTS)
+# Instructs browsers to only use HTTPS for this domain for 1 year
+SECURE_HSTS_SECONDS = 31536000
+
+# Apply HSTS to all subdomains
 SECURE_HSTS_INCLUDE_SUBDOMAINS = True
-SECURE_HSTS_PRELOAD = False
 
-# Content Security Policy - middleware will use this setting if present.
-# Example: allow only same-origin resources; adjust for external CDNs.
-CSP_POLICY = "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:;"
+# Allow domain to be included in browser preload lists
+SECURE_HSTS_PRELOAD = True
 
+
+# Ensure cookies are only sent over HTTPS
+SESSION_COOKIE_SECURE = True
+CSRF_COOKIE_SECURE = True
+
+# Prevent clickjacking
+X_FRAME_OPTIONS = "DENY"
+
+# Prevent MIME-type sniffing
+SECURE_CONTENT_TYPE_NOSNIFF = True
+
+# Enable browser XSS protection
+SECURE_BROWSER_XSS_FILTER = True
+
+# Trust the X-Forwarded-Proto header set by the proxy (e.g. Nginx, Heroku)
+SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")

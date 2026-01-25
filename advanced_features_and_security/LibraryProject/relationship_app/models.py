@@ -6,9 +6,6 @@ from django.db import models
 from django.conf import settings 
 from django.db.models.signals import post_save
 from django.dispatch import receiver
-from django.db.models.signals import post_save
-from django.dispatch import receiver
-
 
 
 class Author(models.Model):
@@ -25,16 +22,20 @@ class Book(models.Model):
         on_delete=models.CASCADE,
         related_name='books'
     )
-
-    def __str__(self):
-        return self.title
-
     class Meta:
         permissions = [
             ("can_add_book", "Can add book"),
             ("can_change_book", "Can change book"),
             ("can_delete_book", "Can delete book"),
+            ('can_view', 'Can view book'),
+            ('can_create', 'Can create book'),
+            ('can_edit', 'Can edit book'),
+            ('can_delete', 'Can delete book'),
+            
         ]
+
+    def __str__(self):
+        return self.title
 
 
 class Library(models.Model):

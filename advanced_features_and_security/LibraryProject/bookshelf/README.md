@@ -1,41 +1,74 @@
-Bookshelf app permissions and group setup
+# Permissions and Groups Setup
 
-This app defines custom permissions for the `Book` model and provides a helper management
-command to create Groups and assign the appropriate permissions.
+This project implements Role-Based Access Control (RBAC) using Django permissions and groups.
 
-Permissions (on model `Book`):
-- `can_view`
-- `can_create`
-- `can_edit`
-- `can_delete`
+## Custom Permissions
+Defined in the Book model:
+- can_view
+- can_create
+- can_edit
+- can_delete
 
-Setup
-1. Run migrations to ensure permissions are created:
+## Groups
+- Viewers: can_view
+- Editors: can_view, can_create, can_edit
+- Admins: all permissions
 
-```bash
-python manage.py makemigrations
-python manage.py migrate
-```
+## Enforcement
+Views are protected using @permission_required decorators.
 
-2. Create groups and assign permissions:
+## Testing
+Permissions were tested by logging in as users from each group and verifying access.
+403 Forbidden responses confirm correct enforcement.
 
-```bash
-python manage.py create_groups
-```
 
-This will create three groups: `Viewers`, `Editors`, and `Admins`.
+## Security Best Practices
 
-Group permissions (created by command):
-- Viewers: `can_view`
-- Editors: `can_view`, `can_create`, `can_edit`
-- Admins: all book permissions
+- DEBUG disabled for production safety
+- Secure cookies enforced via HTTPS
+- CSRF protection enabled in all forms
+- Django ORM used to prevent SQL injection
+- Content Security Policy implemented via django-csp
 
-Testing
-- Create test users and add them to groups via the Django admin.
-- Log in as those users and verify access to the views protected by the corresponding
-  permissions. Views in `bookshelf/views.py` use `permission_required` decorators:
 
-- `book_list`, `book_detail` -> `bookshelf.can_view`
-- `book_create` -> `bookshelf.can_create`
-- `book_edit` -> `bookshelf.can_edit`
-- `book_delete` -> `bookshelf.can_delete`
+
+
+## HTTPS and Security Configuration
+
+This project enforces HTTPS and secure communication using Django security settings.
+
+### Django HTTPS Settings
+- SECURE_SSL_REDIRECT redirects all HTTP traffic to HTTPS.
+- HSTS headers are enabled to prevent protocol downgrade attacks.
+- Secure cookies ensure session and CSRF cookies are only sent over HTTPS.
+- Security headers protect against clickjacking, XSS, and MIME sniffing.
+
+### Deployment Notes
+In production, HTTPS must be enabled at the web server level.
+
+Example (Nginx):
+- Configure SSL certificates using Let's Encrypt.
+- Redirect HTTP (port 80) to HTTPS (port 443).
+- Forward HTTPS requests to Django via WSGI.
+
+These settings are activated only when DEBUG=False.
+
+
+
+## Security Review
+
+### Implemented Measures
+- HTTPS enforcement
+- Secure cookies
+- HTTP security headers
+- HSTS policy
+
+### Benefits
+- Prevents man-in-the-middle attacks
+- Protects authentication cookies
+- Mitigates common web vulnerabilities
+
+### Future Improvements
+- Content Security Policy (CSP)
+- Rate limiting
+- Automated security testing
