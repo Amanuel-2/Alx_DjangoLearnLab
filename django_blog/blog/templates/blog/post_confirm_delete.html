@@ -11,3 +11,12 @@
 
 <a href="{% url 'post-detail' object.pk %}">Cancel</a>
 {% endblock %}
+
+<h2>Delete Comment</h2>
+
+<form method="POST">
+    {% csrf_token %}
+    <button type="submit">Yes, Delete</button>
+</form>
+
+<a href="{% url 'post-detail' object.post.pk %}">Cancel</a>
