@@ -16,7 +16,7 @@ class Post(models.Model):
 
 class Comment(models.Model):
     post = models.ForeignKey(
-        'Post',
+        Post,
         on_delete=models.CASCADE,
         related_name='comments'
     )
@@ -29,9 +29,6 @@ class Comment(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
-        return f'Comment by {self.author} on {self.post}'
-
-    def get_absolute_url(self):
-        return reverse('post-detail', kwargs={'pk': self.post.pk})
+        return f'{self.author} - {self.post}'
 
 
