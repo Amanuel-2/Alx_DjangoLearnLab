@@ -8,9 +8,9 @@ from django.urls import reverse_lazy
 from django.contrib.auth.mixins import LoginRequiredMixin,UserPassesTestMixin
 from .models import Post
 
-from .models import Comment
+from .models import Comment,Tag
 from .forms import CommentForm
-
+from django.db.models import Q  
 # Register view
 def register_view(request):
     if request.method == 'POST':
@@ -56,26 +56,59 @@ class PostDetailView(DetailView):
 class PostCreateView(LoginRequiredMixin, CreateView):
     model = Post
     template_name = 'blog/post_form.html'
-    fields = ['title', 'content']  
+    fields = ['title', 'content', 'tags']   
     success_url = reverse_lazy('post-list')
 
     def form_valid(self, form):
         form.instance.author = self.request.user
-        return super().form_valid(form)
+
+        response = super().form_valid(form)
+
+
+        tags_input = self.request.POST.get('tags', '')
+        tag_list = tags_input.split(',')
+
+        for tag_name in tag_list:
+            tag_name = tag_name.strip()
+
+            if tag_name:
+                tag, created = Tag.objects.get_or_create(name=tag_name)
+                self.object.tags.add(tag)
+
+        return response
+
 
 # updateing
 class PostUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
     model = Post
-    fields = ['title', 'content']
+    fields = ['title', 'content', 'tags']
     template_name = 'blog/post_form.html'
 
     def form_valid(self, form):
         form.instance.author = self.request.user
-        return super().form_valid(form)
+
+        response = super().form_valid(form)
+
+        # ✅ Clear old tags first
+        self.object.tags.clear()
+
+        # ✅ Add new tags
+        tags_input = self.request.POST.get('tags', '')
+        tag_list = tags_input.split(',')
+
+        for tag_name in tag_list:
+            tag_name = tag_name.strip()
+
+            if tag_name:
+                tag, created = Tag.objects.get_or_create(name=tag_name)
+                self.object.tags.add(tag)
+
+        return response
 
     def test_func(self):
         post = self.get_object()
         return self.request.user == post.author
+
 
 # delete view
 class PostDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
@@ -112,3 +145,28 @@ class CommentDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
     def test_func(self):
         comment = self.get_object()
         return self.request.user == comment.author
+
+def posts_by_tag(request, tag_name):
+    tag = Tag.objects.get(name=tag_name)
+    posts = tag.posts.all()
+
+    return render(request, "blog/posts_by_tag.html", {
+        "tag": tag,
+        "posts": posts
+    })
+
+def search_posts(request):
+    query = request.GET.get('q')
+    results = []
+
+    if query:
+        results = Post.objects.filter(
+            Q(title__icontains=query) |
+            Q(content__icontains=query) |
+            Q(tags__name__icontains=query)
+        ).distinct()
+
+    return render(request, 'blog/search_results.html', {
+        'query': query,
+        'results': results
+    })

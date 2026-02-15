@@ -12,6 +12,10 @@
 <body>
     <header>
         <nav>
+            <form method="GET" action="{% url 'search_posts' %}">
+                <input type="text" name="q" placeholder="Search posts...">
+                <button type="submit">Search</button>
+            </form>
             <ul>
 
 
