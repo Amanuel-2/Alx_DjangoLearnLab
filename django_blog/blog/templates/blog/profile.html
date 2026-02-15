@@ -1,16 +1,12 @@
-{% extends 'blog/base.html' %}
-
-{% block title %}Profile{% endblock %}
-
+{% extends "blog/base.html" %}
 {% block content %}
-<h2>Profile</h2>
 
-<p><strong>Username:</strong> {{ user.username }}</p>
+<h2>Profile</h2>
 
 <form method="POST">
     {% csrf_token %}
-    <label>Email:</label>
-    <input type="email" name="email" value="{{ user.email }}">
+    {{ form.as_p }}
     <button type="submit">Update</button>
 </form>
+
 {% endblock %}
