@@ -5,12 +5,14 @@ from django.urls import reverse
 # Create your models here.
 
 class Tag(models.Model):
-    class Meta:
-        ordering = ['name'] 
     name = models.CharField(max_length=50, unique=True)
+
+    class Meta:
+        ordering = ['name']
 
     def __str__(self):
         return self.name
+    
 class Post(models.Model):
     title = models.CharField(max_length=200)
     content = models.TextField()
@@ -19,6 +21,7 @@ class Post(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     tags = models.ManyToManyField(Tag, blank=True, related_name="posts")
+
     def __str__(self):
         return self.title
     

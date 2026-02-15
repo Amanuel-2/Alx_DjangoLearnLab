@@ -1,7 +1,7 @@
 from django.shortcuts import render, redirect
 from django.contrib.auth import login
 from django.contrib.auth.decorators import login_required
-from .forms import RegisterForm
+from .forms import PostForm, RegisterForm
 
 from django.views.generic import (ListView,DetailView,CreateView,UpdateView,DeleteView)
 from django.urls import reverse_lazy
@@ -55,6 +55,7 @@ class PostDetailView(DetailView):
 # Create view
 class PostCreateView(LoginRequiredMixin, CreateView):
     model = Post
+    form_class = PostForm   
     template_name = 'blog/post_form.html'
     fields = ['title', 'content', 'tags']   
     success_url = reverse_lazy('post-list')
@@ -81,6 +82,7 @@ class PostCreateView(LoginRequiredMixin, CreateView):
 # updateing
 class PostUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
     model = Post
+    form_class = PostForm 
     fields = ['title', 'content', 'tags']
     template_name = 'blog/post_form.html'
 
@@ -150,9 +152,9 @@ def posts_by_tag(request, tag_name):
     tag = Tag.objects.get(name=tag_name)
     posts = tag.posts.all()
 
-    return render(request, "blog/posts_by_tag.html", {
-        "tag": tag,
-        "posts": posts
+    return render(request, 'blog/posts_by_tag.html', {
+        'tag': tag,
+        'posts': posts
     })
 
 def search_posts(request):

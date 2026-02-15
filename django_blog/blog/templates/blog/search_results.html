@@ -5,9 +5,8 @@
 
 {% for post in results %}
     <h3>{{ post.title }}</h3>
-    <p>{{ post.content|truncatewords:20 }}</p>
 {% empty %}
     <p>No results found.</p>
 {% endfor %}
-
 {% endblock %}
+
