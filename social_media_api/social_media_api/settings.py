@@ -42,6 +42,7 @@ INSTALLED_APPS = [
     'rest_framework.authtoken',
     'posts',
     'django_filters',
+    'notifications',
 ]
 
 AUTH_USER_MODEL = 'accounts.CustomUser'
